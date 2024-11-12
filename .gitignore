@@ -1,6 +1,6 @@
 
 *.sqlite3
-*.md
+TODO.md
 secretos.py
 
 __pycache__
