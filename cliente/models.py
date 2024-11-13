@@ -21,3 +21,17 @@ class Vehiculo(models.Model):
     entrada = models.DateTimeField(auto_now=False, auto_now_add=True)
     salida = models.DateTimeField(auto_now=True, auto_now_add=False)
     encargado = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
+
+class Hora(models.Model):
+    ESTADOS = {
+        "ESPERA": "En espera...",
+        "PENDIENTE": "Cercano a uso...",
+        "USO": "En uso...",
+        "FINALIZADO": "Terminado."
+    }
+
+    dueño = models.CharField(max_length=30)
+    patente = models.CharField(max_length=6)
+    estado = models.CharField(max_length=11, choices=ESTADOS, default="ESPERA")
+    creado = models.DateTimeField(auto_now=False, auto_now_add=True)
+    terminado = models.DateTimeField(auto_now=True, auto_now_add=False)
