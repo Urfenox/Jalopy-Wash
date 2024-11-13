@@ -9,8 +9,20 @@
             <p class="col-lg-10 fs-4">Rellena el siguiente formulario para agendar una hora para que lavemos tu nae'.</p>
         </div>
     </div>
-</div>
-<div>
-    <form action="" method="post"></form>
+    <div class="text-start">
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="id_dueño" class="form-label"><h4>Tu nombre</h4></label>
+                {{ form.dueño }}
+            </div>
+            <div class="mb-3">
+                <label for="id_patente" class="form-label"><h4>Patente</h4></label>
+                {{ form.patente }}
+                <div id="patenteHelp" class="form-text">Ejemplo ABCD69.</div>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
 </div>
 {% endblock %}
