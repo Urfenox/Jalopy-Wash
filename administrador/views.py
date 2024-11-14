@@ -24,5 +24,17 @@ def horas(request):
     return render(request, "administrador/horas.html", {"horas": horas})
 
 def vehiculos(request):
-    vehiculos = Vehiculo.objects.all()
+    vehiculos = Vehiculo.objects.all().order_by("-entrada")
+    patente = request.GET.get('eliminar', '')
+    if patente:
+        Vehiculo.objects.get(patente=patente).delete()
+        messages.warning(request, "¡Vehiculo eliminado!")
+        return redirect("administrador:vehiculos")
+    vehiculo = request.GET.get('vehiculo', '')
+    if vehiculo:
+        vehiculo = Vehiculo.objects.get(patente=vehiculo)
+        vehiculo.estado = request.GET.get('estado', '')
+        vehiculo.save(force_update=True)
+        messages.success(request, "¡Vehiculo actualizado!")
+        return redirect("administrador:vehiculos")
     return render(request, "administrador/vehiculos.html", {"vehiculos": vehiculos})
