@@ -2,27 +2,58 @@
 {% load static %}
 
 {% block cuerpo %}
+{% if hora %}
 <div class="px-4 py-5 my-5 text-center">
-    <div class="align-items-center g-lg-5 py-5">
-        <div class="text-center text-lg-start">
-            <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">¡Vamos a agendar!</h1>
-            <p class="col-lg-10 fs-4">Rellena el siguiente formulario para agendar una hora para que lavemos tu nae'.</p>
+    <div class="row g-lg-5 py-5">
+        <div class="col-lg-7 text-center text-lg-start">
+            <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Hola, {{ hora.dueño }}.</h1>
+            <p class="fs-4">
+                Hora para {{ hora.patente }} creada a las {{ hora.creado|date:"H:i" }}.
+                <br>
+                Tu hora se encuentra {{ hora.get_estado_display }}
+            </p>
+            <small class="text-body-secondary">Puedes dejar esta pestaña abierta y te avisaremos.</small>
         </div>
     </div>
-    <div class="text-start">
-        <form action="" method="post">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="id_dueño" class="form-label"><h4>Tu nombre</h4></label>
-                {{ form.dueño }}
-            </div>
-            <div class="mb-3">
-                <label for="id_patente" class="form-label"><h4>Patente</h4></label>
-                {{ form.patente }}
-                <div id="patenteHelp" class="form-text">Ejemplo ABCD69.</div>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+</div>
+<script src="{% static 'js/notificador.js' %}"></script>
+{% else %}
+<div class="px-4 py-5 my-5 text-center">
+    <div class="row g-lg-5 py-5">
+        <div class="col-lg-7 text-center text-lg-start">
+            <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">¡Vamos a agendar!</h1>
+            <p class="fs-4">
+                Rellena el siguiente formulario para agendar una hora para que lavemos tu nae'.
+            </p>
+            <form action="{% url 'cliente:agendar' %}" method="post" class="p-4 p-md-5 border rounded-3 bg-body-tertiary">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="id_dueño" class="form-label"><h4>Tu nombre</h4></label>
+                    {{ form.dueño }}
+                </div>
+                <div class="mb-3">
+                    <label for="id_patente" class="form-label"><h4>Patente</h4></label>
+                    {{ form.patente }}
+                    <div id="patenteHelp" class="form-text">Ejemplo ABCD69.</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+        <div class="col-lg-5 text-center text-lg-start">
+            <h1 class="display-4 fw-bold lh-1 text-body-emphasis mb-3">Busca tu hora</h1>
+            <p class="fs-4">
+                Si ya tienes una hora agendada, lo mejor es buscarla.
+            </p>
+            <form action="{% url 'cliente:agendar' %}" method="get" class="p-4 p-md-5 border rounded-3 bg-body-tertiary">
+                <div class="form-floating">
+                    <input name="patente" type="text" class="form-control" id="PATENTE" placeholder="0123456789">
+                    <label for="PATENTE">Patente</label>
+                </div>
+                <small class="text-body-secondary">El formato esperado es ABCD69</small>
+                <button class="w-100 btn btn-lg btn-primary" type="submit">Buscar</button>
+            </form>
+        </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}

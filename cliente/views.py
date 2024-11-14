@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 from django.contrib import messages
 from .models import Vehiculo, Hora
 from .forms import Agendar
@@ -11,12 +12,26 @@ def index(request):
 def agendar(request):
     form = Agendar(request.POST or None)
     if form.is_valid():
-        if Hora.objects.get(patente=form.cleaned_data['patente']):
+        hora_existente = Hora.objects.get(patente=form.cleaned_data['patente'])
+        if hora_existente:
             messages.error(request, "¡Ups! Ya existe una hora para este vehiculo.")
-            return redirect("cliente:agendar")
+            response = redirect('cliente:agendar')
+            response['Location'] += str(f'?patente={hora_existente.patente}')
+            return response
         form.save()
         messages.success(request, "¡Hora agendada correctamente!")
         return redirect("cliente:agendar")
+    patente = request.GET.get('patente', '')
+    if patente:
+        hora = get_object_or_404(Hora, patente=patente)
+        if request.headers['content-type'] == "application/json":
+            return JsonResponse({
+                "dueño": hora.dueño,
+                "patente": hora.patente,
+                "estado": hora.estado,
+                "creado": hora.creado
+            })
+        return render(request, "cliente/agendar.html", {"hora":hora})
     return render(request, "cliente/agendar.html", {"form": form})
 
 def buscar(request):
