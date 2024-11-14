@@ -12,7 +12,7 @@ def index(request):
 def agendar(request):
     form = Agendar(request.POST or None)
     if form.is_valid():
-        hora_existente = Hora.objects.get(patente=form.cleaned_data['patente'])
+        hora_existente = Hora.objects.filter(patente=form.cleaned_data['patente'])[0]
         if hora_existente:
             messages.error(request, "¡Ups! Ya existe una hora para este vehiculo.")
             response = redirect('cliente:agendar')
