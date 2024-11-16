@@ -50,7 +50,7 @@
                     <input id="patente" class="swal2-input" placeholder="Patente">
                     <select id="estado" class="swal2-select" placeholder="Estado">
                         <option value="" disabled="">Seleccione un estado</option>
-                        <option value="ESPERA">En espera...</option>
+                        <option value="ESPERA" selected>En espera...</option>
                         <option value="PREPARACION">En preparación...</option>
                         <option value="LAVADO">En lavado...</option>
                         <option value="SECADO">En secado...</option>
@@ -150,7 +150,16 @@
                     }
                 },
                 inputPlaceholder: 'Seleccione un estado',
-                showCancelButton: true
+                showCancelButton: true,
+                inputValidator: (value) => {
+                    return new Promise((resolve) => {
+                        if (value) {
+                            resolve();
+                        } else {
+                            resolve("Debes selecionar un estado");
+                        }
+                    });
+                }
             }
         ).then((result) => {
             if(result.isConfirmed){

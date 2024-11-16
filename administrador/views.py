@@ -16,7 +16,7 @@ def horas(request):
         messages.warning(request, "¡Hora cancelada!")
         return redirect("administrador:horas")
     hora = request.GET.get('hora', '')
-    if hora:
+    if hora and request.GET.get('estado', ''):
         hora = Hora.objects.get(patente=hora)
         hora.estado = request.GET.get('estado', '')
         hora.save(force_update=True)
@@ -45,7 +45,7 @@ def vehiculos(request):
         messages.warning(request, "¡Vehiculo eliminado!")
         return redirect("administrador:vehiculos")
     vehiculo = request.GET.get('vehiculo', '')
-    if vehiculo:
+    if vehiculo and request.GET.get('estado', ''):
         vehiculo = Vehiculo.objects.get(patente=vehiculo)
         vehiculo.estado = request.GET.get('estado', '')
         vehiculo.save(force_update=True)
