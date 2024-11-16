@@ -2,6 +2,9 @@
 {% load static %}
 
 {% block cuerpo %}
+<div class="d-grid gap-2 col-3 mx-auto">
+    <button onClick="javascript:horaCrear();" class="btn btn-primary" type="button">Crear nueva hora</button>
+</div>
 {% if horas %}
 <table id="horas-tabla" class="table table-striped">
     <thead>
@@ -34,6 +37,65 @@
         {% endfor %}
     </tbody>
 </table>
+<script>
+    function horaCrear() {
+        Swal.fire(
+            {
+                title: "Nueva hora",
+                html: `
+                    <input id="dueño" class="swal2-input" placeholder="Dueño">
+                    <input id="patente" class="swal2-input" placeholder="Patente">
+                    <select id="estado" class="swal2-select" placeholder="Estado">
+                        <option value="" disabled="">Seleccione un estado</option>
+                        <option value="ESPERA">En espera...</option>
+                        <option value="PENDIENTE">Cercano a uso...</option>
+                        <option value="USO">En uso...</option>
+                        <option value="FINALIZADO">Terminado.</option>
+                    </select>
+                `,
+                confirmButtonText: 'Crear',
+                focusConfirm: false,
+                preConfirm: () => {
+                    let dueño = document.getElementById("dueño").value
+                    let patente = document.getElementById("patente").value
+                    let estado = document.getElementById("estado").value
+                    if (!dueño || !patente || !estado) {
+                        return Swal.showValidationMessage(`No data, no party.`);
+                    }
+                    return [
+                        dueño,
+                        patente,
+                        estado
+                    ];
+                }
+            }
+        ).then((result) => {
+            if(result.isConfirmed){
+                console.log(result);
+                let formData = new FormData();
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                formData.append('dueño', result.value[0]);
+                formData.append('patente', result.value[1]);
+                formData.append('estado', result.value[2]);
+                console.log(formData);
+                fetch(
+                    "{% url 'administrador:horas' %}",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                )
+                .then((respuesta => respuesta.json()))
+                .then((respuesta) => {
+                    console.log(respuesta);
+                    if (respuesta.estado == "OK") {
+                        location.reload();
+                    }
+                });
+                }
+        });
+    }
+</script>
 <script>
     function horaModificar(patente) {
         Swal.fire(

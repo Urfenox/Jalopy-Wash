@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.contrib import messages
 from cliente.models import Hora, Vehiculo
 
@@ -21,6 +22,17 @@ def horas(request):
         hora.save(force_update=True)
         messages.success(request, "¡Hora actualizada!")
         return redirect("administrador:horas")
+    if request.POST:
+        hora = Hora(dueño=request.POST.get('dueño', ''), patente=request.POST.get('patente', ''), estado=request.POST.get('estado', ''))
+        hora.save()
+        return JsonResponse({
+            "estado": "OK",
+            "datos": {
+                "dueño": request.POST.get('dueño', ''),
+                "patente": request.POST.get('patente', ''),
+                "estado": request.POST.get('estado', '')
+            }
+        })
     return render(request, "administrador/horas.html", {"horas": horas})
 
 def vehiculos(request):
