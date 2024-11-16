@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib import messages
-from cliente.models import Hora, Vehiculo
+from cliente.models import Hora, Vehiculo, User
 
 # Create your views here.
 
@@ -37,6 +37,8 @@ def horas(request):
 
 def vehiculos(request):
     vehiculos = Vehiculo.objects.all().order_by("-entrada")
+    horas = Hora.objects.all()
+    encargados = User.objects.filter(groups__name__in=['Encargado'])
     patente = request.GET.get('eliminar', '')
     if patente:
         Vehiculo.objects.get(patente=patente).delete()
@@ -49,4 +51,39 @@ def vehiculos(request):
         vehiculo.save(force_update=True)
         messages.success(request, "¡Vehiculo actualizado!")
         return redirect("administrador:vehiculos")
-    return render(request, "administrador/vehiculos.html", {"vehiculos": vehiculos})
+    if request.POST:
+        if len(vehiculos.filter(patente=request.POST.get('patente', ''))) > 0:
+            return JsonResponse({
+                "estado": "EXISTS",
+                "datos": {
+                    "dueño": request.POST.get('dueño', ''),
+                    "patente": request.POST.get('patente', ''),
+                    "estado": request.POST.get('estado', ''),
+                    "encargado": request.POST.get('encargado', ''),
+                    "hora": request.POST.get('hora', ''),
+            }
+        })
+        vehiculo = Vehiculo(uid=request.POST.get('uid', ''), dueño=request.POST.get('dueño', ''), patente=request.POST.get('patente', ''), estado=request.POST.get('estado', ''))
+        hora = request.POST.get('hora', '')
+        if hora:
+            hora = Hora.objects.get(id=hora)
+            hora.estado = "USO"
+            hora.save(force_update=True)
+            vehiculo.hora = hora
+            vehiculo.dueño = hora.dueño
+            vehiculo.patente = hora.patente
+        encargado = request.POST.get('encargado', '')
+        if encargado:
+            vehiculo.encargado = User.objects.get(id=encargado)
+        vehiculo.save()
+        return JsonResponse({
+            "estado": "OK",
+            "datos": {
+                "dueño": request.POST.get('dueño', ''),
+                "patente": request.POST.get('patente', ''),
+                "estado": request.POST.get('estado', ''),
+                "encargado": request.POST.get('encargado', ''),
+                "hora": request.POST.get('hora', ''),
+            }
+        })
+    return render(request, "administrador/vehiculos.html", {"vehiculos": vehiculos, "horas": horas, "encargados": encargados})

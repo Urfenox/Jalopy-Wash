@@ -2,6 +2,9 @@
 {% load static %}
 
 {% block cuerpo %}
+<div class="d-grid gap-2 col-3 mx-auto">
+    <button onClick="javascript:vehiculoCrear();" class="btn btn-primary" type="button">Crear nuevo</button>
+</div>
 {% if vehiculos %}
 <table id="vehiculos-tabla" class="table table-striped">
     <thead>
@@ -36,6 +39,100 @@
         {% endfor %}
     </tbody>
 </table>
+<script>
+    function vehiculoCrear() {
+        Swal.fire(
+            {
+                title: "Nuevo vehiculo",
+                html: `
+                    <input id="uid" class="swal2-input" placeholder="UID">
+                    <input id="dueño" class="swal2-input" placeholder="Dueño">
+                    <input id="patente" class="swal2-input" placeholder="Patente">
+                    <select id="estado" class="swal2-select" placeholder="Estado">
+                        <option value="" disabled="">Seleccione un estado</option>
+                        <option value="ESPERA">En espera...</option>
+                        <option value="PREPARACION">En preparación...</option>
+                        <option value="LAVADO">En lavado...</option>
+                        <option value="SECADO">En secado...</option>
+                        <option value="LISTO">Listo para retiro</option>
+                        <option value="FINALIZADO">Proceso terminado</option>
+                    </select>
+                    <select id="encargado" class="swal2-select" placeholder="Encargado">
+                        <option value="" selected disabled="">Seleccione una encargado</option>
+                        {% for encargado in encargados %}
+                        <option value="{{ encargado.id }}">{{ encargado }}</option>
+                        {% endfor %}
+                    </select>
+                    <select id="hora" class="swal2-select" placeholder="Hora">
+                        <option value="" selected disabled="">Seleccione una hora</option>
+                        {% for hora in horas %}
+                        <option value="{{ hora.id }}">{{ hora }}</option>
+                        {% endfor %}
+                    </select>
+                `,
+                confirmButtonText: 'Crear',
+                focusConfirm: false,
+                preConfirm: () => {
+                    let uid = document.getElementById("uid").value
+                    let dueño = document.getElementById("dueño").value
+                    let patente = document.getElementById("patente").value
+                    let estado = document.getElementById("estado").value
+                    let encargado = document.getElementById("encargado").value
+                    let hora = document.getElementById("hora").value
+                    if (!uid || !estado || !encargado) {
+                        return Swal.showValidationMessage(`UID, Estado o Encargado faltante/s.`);
+                    }
+                    if (!hora) {
+                        if (!dueño || !patente) {
+                            return Swal.showValidationMessage(`Si no hay una hora asignada, debe rellenar los campos Dueño y Patente.`);
+                        }
+                    }
+                    return [
+                        parseInt(uid),
+                        dueño,
+                        patente,
+                        estado,
+                        encargado,
+                        hora
+                    ];
+                }
+            }
+        ).then((result) => {
+            if (result.isConfirmed) {
+                console.log(result);
+                let formData = new FormData();
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+                formData.append('uid', result.value[0]);
+                formData.append('dueño', result.value[1]);
+                formData.append('patente', result.value[2]);
+                formData.append('estado', result.value[3]);
+                formData.append('encargado', result.value[4]);
+                formData.append('hora', result.value[5]);
+                console.log(formData);
+                fetch(
+                    "{% url 'administrador:vehiculos' %}",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                )
+                .then((respuesta => respuesta.json()))
+                .then((respuesta) => {
+                    console.log(respuesta);
+                    if (respuesta.estado == "OK") {
+                        location.reload();
+                    } else if (respuesta.estado == "EXISTS") {
+                        Swal.fire({
+                            title: "Ya existe!",
+                            text: "El vehiculo ya existe.",
+                            icon: "info"
+                        });
+                    }
+                });
+            }
+        });
+    }
+</script>
 <script>
     function vehiculoModificar(patente) {
         Swal.fire(
@@ -83,7 +180,7 @@
         //     url: "//cdn.datatables.net/plug-ins/2.0.3/i18n/es-ES.json"
         // },
         order: [
-            [4, 'desc']
+            [4, 'asc']
         ]
     });
 </script>

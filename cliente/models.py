@@ -37,7 +37,7 @@ class Vehiculo(models.Model):
     estado = models.CharField(max_length=12, choices=ESTADOS, default="ESPERA")
     entrada = models.DateTimeField(auto_now=False, auto_now_add=True)
     salida = models.DateTimeField(auto_now=True, auto_now_add=False)
-    encargado = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
+    encargado = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     hora = models.ForeignKey(Hora, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
