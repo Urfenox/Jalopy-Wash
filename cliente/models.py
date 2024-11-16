@@ -42,3 +42,14 @@ class Vehiculo(models.Model):
 
     def __str__(self):
         return str(self.patente + " de " + self.dueño)
+
+    def save(self, *args, **kwargs):
+        if self.estado == "SECADO" or self.estado == "LISTO":
+            hora = Hora.objects.all().order_by("-creado").first()
+            if hora:
+                hora.estado = "PENDIENTE"
+                hora.save(force_update=True)
+        if (self.hora and (self.estado == "LISTO" or self.estado == "FINALIZADO")):
+            self.hora.estado = "FINALIZADO"
+            self.hora.save(force_update=True)
+        super(Vehiculo, self).save(*args, **kwargs)
